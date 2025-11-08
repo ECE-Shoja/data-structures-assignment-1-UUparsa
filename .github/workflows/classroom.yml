@@ -25,12 +25,12 @@ jobs:
           echo "Compiling C++..."
           g++ starter/*.cpp -o program
           echo "Compile done"
-          for i in {1..10}
-          do
+
+          FAILED=0
+          for i in {1..10}; do
             echo "Running test $i..."
-            ./program < tests/input$i.txt > result$i.txt
-            if diff -w result$i.txt tests/output$i.txt > /dev/null
-            then
+            ./program < tests/input$i.txt > result$i.txt 2>&1 || true
+            if diff -w tests/output$i.txt result$i.txt > /dev/null; then
               echo "Test $i passed"
             else
               echo "Test $i FAILED"
@@ -38,9 +38,12 @@ jobs:
               cat tests/output$i.txt
               echo "Got:"
               cat result$i.txt
-              exit 1
+              echo "Unified diff:"
+              diff -u tests/output$i.txt result$i.txt || true
+              FAILED=1
             fi
           done
+          exit $FAILED
         fi
 
     - name: Test Java submissions
@@ -49,12 +52,12 @@ jobs:
           echo "Compiling Java..."
           javac starter/*.java
           echo "Compile done"
-          for i in {1..10}
-          do
+
+          FAILED=0
+          for i in {1..10}; do
             echo "Running test $i..."
-            java -cp starter DSU < tests/input$i.txt > result$i.txt
-            if diff -w result$i.txt tests/output$i.txt > /dev/null
-            then
+            java -cp starter DSU < tests/input$i.txt > result$i.txt 2>&1 || true
+            if diff -w tests/output$i.txt result$i.txt > /dev/null; then
               echo "Test $i passed"
             else
               echo "Test $i FAILED"
@@ -62,12 +65,16 @@ jobs:
               cat tests/output$i.txt
               echo "Got:"
               cat result$i.txt
-              exit 1
+              echo "Unified diff:"
+              diff -u tests/output$i.txt result$i.txt || true
+              FAILED=1
             fi
           done
+          exit $FAILED
         fi
 
     - name: Autograding Reporter
+      if: ${{ always() }}
       uses: classroom-resources/autograding-grading-reporter@v1
       with:
-        runners: "ubuntu-latest"
+        runners: ubuntu-latest
