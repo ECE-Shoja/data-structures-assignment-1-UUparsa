@@ -46,7 +46,7 @@ jobs:
     - name: Test Java submissions
       run: |
         if ls starter/*.java 1> /dev/null 2>&1; then
-          echo " Compiling Java..."
+          echo "Compiling Java..."
           javac starter/*.java
           echo "Compile done"
           for i in {1..10}
@@ -69,3 +69,5 @@ jobs:
 
     - name: Autograding Reporter
       uses: classroom-resources/autograding-grading-reporter@v1
+      with:
+        runners: "ubuntu-latest"
